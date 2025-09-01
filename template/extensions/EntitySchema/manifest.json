@@ -1,0 +1,10 @@
+{
+  "git": {
+    "EntitySchema": {
+      "path": "https://gerrit.wikimedia.org/r/mediawiki/extensions/EntitySchema",
+      "version": "REL1_39",
+      "custom_folder": "",
+      "active": true
+    }
+  }
+}

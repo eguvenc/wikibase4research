@@ -1,0 +1,9 @@
+{
+    "composer": {
+        "WikibaseRDF": {
+            "path": "professional-wiki/wikibase-rdf",
+            "version": "~1.0",
+            "active": true
+        }
+    }
+}

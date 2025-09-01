@@ -1,0 +1,32 @@
+{
+  "collections": {
+    "wikibase_plain": {
+      "name": "Wikibase",
+      "description": "A basic collection of extensions suitable for a Wikibase project",
+      "extensions": [
+        "Wikibase",
+        "WikibaseManifest",
+        "Babel",
+        "EntitySchema",
+        "OAuth",
+        "WikibaseLocalMedia",
+        "WikibaseEdtf"
+      ],
+      "requirements": {
+        "services": ["control","elasticsearch","openrefine","wbjobrunner","wdqs","wiki"]
+      }
+    },
+    "semantic_mediawiki": {
+      "name": "Semantic Mediawiki",
+      "description": "A basic Semantic Mediawiki installation, w/o wikibase functionality",
+      "extensions": [
+        "OAuth"
+      ],
+      "requirements": {
+        "services": [
+          "elasticsearch"
+        ]
+      }
+    }
+  }
+}

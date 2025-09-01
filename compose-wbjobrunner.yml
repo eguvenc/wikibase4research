@@ -1,0 +1,27 @@
+services:
+  # -----------------------------
+  # Wikibase Jobrunner
+  # -----------------------------
+
+  wikibase_jobrunner:
+    build:
+      context: .
+      dockerfile: docker/mediawiki_with_composer.Dockerfile
+      args:
+        W4R_MW_VERSION: $W4R_MW_VERSION
+        W4R_MW_WIKI_NAME: $W4R_MW_WIKI_NAME
+        W4R_MW_ADMIN_USER: $W4R_MW_ADMIN_USER
+        W4R_MW_ADMIN_PASS: $W4R_MW_ADMIN_PASS
+        W4R_FULL_SERVER_NAME: $W4R_FULL_SERVER_NAME
+        W4R_DB_SERVER: $W4R_DB_SERVER
+        W4R_DB_NAME: $W4R_DB_NAME
+        W4R_DB_USER: $W4R_DB_USER
+        W4R_DB_PASS: $W4R_DB_PASS
+        W4R_INIT_FOLDER: $W4R_INIT_FOLDER
+    command: /jobrunner-entrypoint.sh
+    depends_on:
+      wikibase:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes_from:
+      - wikibase

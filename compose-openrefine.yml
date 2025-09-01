@@ -1,0 +1,27 @@
+services:
+  ####################
+  # Openrefine       #
+  ####################
+  openrefine-redis:
+    image: "redis:alpine"
+    #container_name: openrefine-redis
+    expose:
+      - "6379"
+
+  openrefine:
+    image: registry.gitlab.com/nfdi4culture/openrefine-reconciliation-services/openrefine-wikibase:latest
+    volumes:
+      - $W4R_INIT_FOLDER/config/openrefine/openrefine-wikibase-config.py:/openrefine-wikibase/config.py
+      - $W4R_INIT_FOLDER/config/openrefine/openrefine-manifest.json:/openrefine-wikibase/static/manifest.json
+    environment:
+      W4R_MW_WIKI_NAME: ${W4R_MW_WIKI_NAME}
+      W4R_SERVER_NAME: ${W4R_SERVER_NAME}
+      W4R_OPENREFINE_SERVER_NAME: ${W4R_OPENREFINE_SERVER_NAME}
+    depends_on:
+      - openrefine-redis
+    labels:
+      - "traefik.http.routers.openrefine.rule=Host(`${W4R_OPENREFINE_SERVER_NAME}`)"
+    ports:
+      - "8000:8000"
+    # command to hold container for testing
+    #command: tail -F anything
