@@ -1,0 +1,10 @@
+{
+  "git": {
+    "Babel": {
+      "path": "https://gerrit.wikimedia.org/r/mediawiki/extensions/Babel",
+      "version": "REL1_39",
+      "custom_folder": "",
+      "active": true
+    }
+  }
+}

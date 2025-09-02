@@ -1,0 +1,118 @@
+services:
+  # -----------------------------
+  # Base wiki Service
+  # -----------------------------
+  # This must be used as the base for all wiki services
+
+  wikibase:
+    build:
+      context: .
+      dockerfile: docker/mediawiki_with_composer.Dockerfile
+      args:
+        W4R_MW_VERSION: $W4R_MW_VERSION
+        W4R_MW_WIKI_NAME: $W4R_MW_WIKI_NAME
+        W4R_MW_ADMIN_USER: $W4R_MW_ADMIN_USER
+        W4R_MW_ADMIN_PASS: $W4R_MW_ADMIN_PASS
+        W4R_FULL_SERVER_NAME: $W4R_FULL_SERVER_NAME
+        W4R_DB_SERVER: $W4R_DB_SERVER
+        W4R_DB_NAME: $W4R_DB_NAME
+        W4R_DB_USER: $W4R_DB_USER
+        W4R_DB_PASS: $W4R_DB_PASS
+        W4R_INIT_FOLDER: $W4R_INIT_FOLDER
+    restart: unless-stopped
+    volumes:
+      # Import of LocalSettings
+      - $W4R_INIT_FOLDER/config/LocalSettings.php:/var/www/html/LocalSettings.php.tmp
+      - $W4R_INIT_FOLDER/config/LocalSettings.d:/var/www/html/LocalSettings.d
+      - $W4R_INIT_FOLDER/config/fileUploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+
+      # Rewrite Rules TODO: put in image
+      - ./scripts/wblocal.htaccess:/var/www/html/.htaccess
+
+      # Import of whole Folder for ImportWikiContent.sh
+      - $W4R_INIT_FOLDER:/var/tmp/wikiPresets
+      - $W4R_INIT_FOLDER/dump.xml:/var/www/html/dump.xml
+
+      # Direct access to asssets folders
+      - $W4R_INIT_FOLDER/wb_resources/images:/var/www/html/images:rw
+      - $W4R_INIT_FOLDER/wb_resources/assets:/var/www/html/resources/assets/custom
+
+      # Access to all scripts TODO: do we need really every script?
+      - ./scripts:/var/www/html/scripts
+
+      #  shared volume
+      - app-data:/var/www/html
+    depends_on:
+      database:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wikibase.rule=Host(`${W4R_SERVER_NAME}`)"
+      - "traefik.http.routers.wikibase.entrypoints=web"
+      - "traefik.http.services.wikibase.loadbalancer.server.port=80"
+      #- "traefik.http.middlewares.wikibase-rewrite-entity.replacepathregex.regex=^/entity/(.*)"
+      #- "traefik.http.middlewares.wikibase-rewrite-entity.replacepathregex.replacement=/index.php?title=Special:EntityData/$$1"
+      #- "traefik.http.middlewares.wikibase-rewrite-prop.replacepathregex.regex=^/prop/(.*)"
+      #- "traefik.http.middlewares.wikibase-rewrite-prop.replacepathregex.replacement=/index.php?title=Special:EntityData/$$1"
+      #- "traefik.http.routers.wikibase.middlewares=wikibase-rewrite-entity,wikibase-rewrite-prop"
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    user: root
+    healthcheck:
+      test: ["CMD", "curl", "-f", "wikibase/index.php"]
+      interval: 30s
+      retries: $W4R_COMPOSER_HEALTHCHECK_RETRIES
+      start_period: 30s
+      timeout: 10s
+    networks:
+      default:
+        aliases:
+          - ${W4R_SERVER_NAME}
+    environment:
+      - W4R_MAIL_HOST=${W4R_MAIL_HOST}
+      - W4R_MAIL_PORT=${W4R_MAIL_PORT}
+      - W4R_SERVER_NAME=${W4R_SERVER_NAME}
+
+  database:
+    image: mariadb:10.9
+    restart: unless-stopped
+    environment:
+      MARIADB_USER: ${W4R_DB_USER}
+      MARIADB_PASSWORD: ${W4R_DB_PASS}
+      MARIADB_DATABASE: ${W4R_DB_NAME}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "database",
+          "-u",
+          "${W4R_DB_USER}",
+          "-p${W4R_DB_PASS}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db-data:/var/lib/mysql
+
+  reverse-proxy:
+    image: traefik:v3.0
+    command:
+      # Logging and Debug
+      - "--log.level=DEBUG"
+      - "--accesslog=true" # Enable access logs
+      - "--accesslog.format=json" # Optional: Use JSON format for logs
+      - "--accesslog.bufferingsize=100" # Optional: Buffer size for access logs
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - $W4R_REVERSEPROXY_PORT:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  app-data:
+  db-data:

@@ -1,0 +1,94 @@
+services:
+    redis:
+        image: redis:alpine
+    kompakkt-mongo:
+        image: mongo:8-noble
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+        volumes:
+            - kompakkt_mongodb_data:/data/db
+    kompressor:
+        image: ghcr.io/kompakkt/kompressor:latest
+        volumes:
+            - uploads:/app/uploads
+    sonic-search:
+      image: docker.io/valeriansaliou/sonic:latest
+      volumes:
+        - sonic_data:/var/lib/sonic/store/
+        - ./sonic/sonic.cfg:/etc/sonic.cfg:ro
+    server:
+        image: ghcr.io/kompakkt/server/server:main
+        restart: always
+        depends_on:
+            - redis
+            - kompakkt-mongo
+            - kompressor
+            - sonic-search
+        volumes:
+            - uploads:/app/src/uploads
+        labels:
+            - "traefik.http.routers.server.rule=Host(`${W4R_KOMPAKKT_SERVER_NAME}`) && PathPrefix(`/server`)"
+            - "traefik.http.services.server.loadbalancer.server.port=3030"
+            - "traefik.http.routers.server.middlewares=secure-headers"
+            - "traefik.http.middlewares.secure-headers.headers.customRequestHeaders.X-Forwarded-Proto=https"
+        environment:
+            - DOCKER_ENV=true
+            - CONFIGURATION_MONGO_CLIENT_URL=${MONGO_URL}
+            - CONFIGURATION_REDIS_HOSTNAME=redis
+            - CONFIGURATION_REDIS_PORT=6379
+            - CONFIGURATION_REDIS_DB_OFFSET=0
+            - CONFIGURATION_EXPRESS_HOST=0.0.0.0
+            - CONFIGURATION_EXPRESS_PORT=8080
+            - CONFIGURATION_SONIC_HOSTNAME=sonic-search
+            - CONFIGURATION_EXPRESS_ORIGIN_WHITELIST=*
+            - CONFIGURATION_EXPRESS_ENABLE_HTTPS=false
+            - CONFIGURATION_EXPRESS_PASSPORT_SECRET=test
+            - CONFIGURATION_SERVER_PUBLIC_URL=${W4R_KOMPAKKT_FULL_SERVER_NAME}
+            - CONFIGURATION_KOMPRESSOR_ENABLED=true
+            - CONFIGURATION_KOMPRESSOR_HOSTNAME=kompressor
+            - CONFIGURATION_MAILER_HOST=${W4R_MAIL_HOST}
+            - CONFIGURATION_MAILER_PORT=${W4R_MAIL_PORT}
+            - CONFIGURATION_MAILER_USER=
+            - CONFIGURATION_MAILER_PASS=
+            - CONFIGURATION_MAILER_SECURE=false
+            - CONFIGURATION_MAILER_TARGET_CONTACT=semantic-kompakkt@tib.eu
+            - CONFIGURATION_MAILER_TARGET_UPLOAD=semantic-kompakkt@tib.eu
+            - CONFIGURATION_MAILER_TARGET_BUGREPORT=semantic-kompakkt@tib.eu
+            - CONFIGURATION_EXTENSION_WIKIBASE_KOMPAKKT_ADDRESS=${W4R_KOMPAKKT_SERVER_NAME}
+            - CONFIGURATION_EXTENSION_WIKIBASE_PUBLIC=${W4R_FULL_SERVER_NAME}
+            - CONFIGURATION_EXTENSION_WIKIBASE_DOMAIN=http://wikibase #${W4R_SERVER_NAME}
+            - CONFIGURATION_EXTENSION_WIKIBASE_SPARQL_ENDPOINT=http://wdqs-frontend/proxy/wdqs/bigdata/namespace/wdq/sparql
+            - CONFIGURATION_EXTENSION_WIKIBASE_USERNAME=${W4R_MW_ADMIN_USER}
+            - CONFIGURATION_EXTENSION_WIKIBASE_PASSWORD=${W4R_MW_ADMIN_PASS}
+            - CONFIGURATION_EXTENSION_WIKIBASE_ADMIN_USERNAME=${W4R_MW_ADMIN_USER}
+            - CONFIGURATION_EXTENSION_WIKIBASE_ADMIN_PASSWORD=${W4R_MW_ADMIN_PASS}
+            - CONFIGURATION_EXTENSION_WIKIBASE_TTL_FILE_URL=${W4R_DATA_MODEL_FILE_URL}
+
+    repo:
+        image: ghcr.io/kompakkt/repo/repo-nginx:sk-main
+        depends_on:
+            - redis
+            - kompakkt-mongo
+        labels:
+            - "traefik.http.routers.repo.rule=Host(`${W4R_KOMPAKKT_SERVER_NAME}`)"
+        volumes:
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+    viewer:
+        image: ghcr.io/kompakkt/viewer/viewer-nginx:sk-main
+        depends_on:
+            - redis
+            - kompakkt-mongo
+        labels:
+            - "traefik.http.routers.viewer.rule=Host(`${W4R_KOMPAKKT_SERVER_NAME}`) && PathPrefix(`/viewer`)"
+            - "traefik.http.services.viewer.loadbalancer.server.port=80"
+            - "traefik.http.routers.viewer.middlewares=strip-viewer-prefix"
+            - "traefik.http.middlewares.strip-viewer-prefix.stripprefix.prefixes=/viewer"
+        volumes:
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+volumes:
+    uploads:
+    sonic_data:
+    kompakkt_mongodb_data:

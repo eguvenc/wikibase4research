@@ -1,0 +1,38 @@
+{
+    "version": "2.0",
+    "mediawiki": {
+        "name": "{{W4R_MW_WIKI_NAME}}",
+        "root": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/wiki/",
+        "main_page": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/wiki/Main_Page",
+        "api": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/w/api.php"
+    },
+    "wikibase": {
+        "site_iri": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/entity/",
+        "maxlag": 5,
+        "properties": {
+            "instance_of": "P1",
+            "subclass_of": "P2"
+        }
+    },
+    "oauth": {
+        "registration_page": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/wiki/Special:OAuthConsumerRegistration/propose"
+    },
+    "entity_types": {
+        "item": {
+            "site_iri": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/entity/",
+            "reconciliation_endpoint": "{{W4R_SCHEME}}://reconcile.{{ W4R_SERVER_NAME }}/${lang}/api",
+            "mediawiki_api": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/w/api.php"
+        },
+        "property": {
+            "site_iri": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/entity/",
+            "mediawiki_api": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/w/api.php"
+        },
+        "mediainfo": {
+            "site_iri": "{{W4R_SCHEME}}://{{ W4R_SERVER_NAME }}/entity/",
+            "reconciliation_endpoint": "{{W4R_SCHEME}}://reconcile.{{ W4R_SERVER_NAME }}/${lang}/api"
+        }
+    },
+    "editgroups": {
+        "url_schema": "([[:toollabs:editgroups-commons/b/OR/${batch_id}|details]])"
+    }
+}
