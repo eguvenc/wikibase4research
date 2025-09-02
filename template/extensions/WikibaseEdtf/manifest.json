@@ -1,9 +1,0 @@
-{
-  "composer": {
-    "WikibaseEdtf": {
-      "path": "professional-wiki/wikibase-edtf",
-      "version": "^2.0.0",
-      "active": true
-    }
-  }
-}
