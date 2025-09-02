@@ -1,9 +1,0 @@
-{
-  "composer": {
-    "WikibaseLocalMedia": {
-      "path": "professional-wiki/wikibase-local-media",
-      "version": "~1",
-      "active": true
-    }
-  }
-}

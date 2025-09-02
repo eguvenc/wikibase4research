@@ -57,6 +57,44 @@ cp -r wikiPresets/wikibase_plain/* wikiProjects/testProject
 git -C wikiProjects/testProject init
 ```
 
+CHANGE SKIN VERSION FROM extensionManagement.json file
+
+```json
+"skins": {
+    "git": {
+        "Tweeki": {
+            "path": "https://github.com/thaider/Tweeki",
+            "version": "REL1_39",
+            "custom_folder": "",
+            "active": true
+        }
+    },
+    "composer": {
+
+    }
+}
+```
+
+<!-- 
+docker exec -it wikiprojects_testproject-wikibase-1 bash
+root@62261f3db565:/var/www/html# ls
+
+cd extensions/
+
+git clone -b REL1_39 https://github.com/thaider/Tweeki.git
+
+chown -R www-data:www-data /var/www/html/extensions/Tweeki
+
+
+Edit composer.yml  and add this line to mount custom extensions and skins.
+
+
+- $W4R_INIT_FOLDER/wiki/extensions:/var/www/html/extensions
+
+
+docker compose --env-file wikiProjects/testProject/config/.env up -d --build wikibase -->
+
+
 ---
 
 ## ⚙️ .env Dosyası
