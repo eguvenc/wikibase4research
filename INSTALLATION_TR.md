@@ -45,8 +45,9 @@ newgrp docker
 ## 📥 Depoyu Klonlamak
 
 ```bash
-git clone https://gitlab.com/nfdi4culture/wikibase4research/wikibase4research.git
-cd wikibase4research
+git clone https://gitlab.com/nfdi4culture/wikibase4research/wikibase4research.git temp-repo
+cp -r temp-repo/* .
+rm -rf temp-repo
 ```
 
 Projen için bir klasör oluştur:
@@ -57,43 +58,27 @@ cp -r wikiPresets/wikibase_plain/* wikiProjects/testProject
 git -C wikiProjects/testProject init
 ```
 
-CHANGE SKIN VERSION FROM extensionManagement.json file
+Test
 
-```json
-"skins": {
-    "git": {
-        "Tweeki": {
-            "path": "https://github.com/thaider/Tweeki",
-            "version": "REL1_39",
-            "custom_folder": "",
-            "active": true
-        }
-    },
-    "composer": {
+```
+./wiki.sh wikiProjects/myProject command "php maintenance/runJobs.php"
 
-    }
-}
+Fatal error: Uncaught ExtensionDependencyError: Tweeki is not compatible with the current MediaWiki core (version 1.39.13), it requires: >= 1.43.0.
+ in /var/www/html/includes/registration/ExtensionRegistry.php:432
+Stack trace:
+#0 /var/www/html/includes/registration/ExtensionRegistry.php(276): ExtensionRegistry->readFromQueue(Array)
+#1 /var/www/html/includes/Setup.php(278): ExtensionRegistry->loadFromQueue()
+#2 /var/www/html/maintenance/doMaintenance.php(83): require_once('/var/www/html/i...')
+#3 /var/www/html/maintenance/runJobs.php(136): require_once('/var/www/html/m...')
+#4 {main}
+  thrown in /var/www/html/includes/registration/ExtensionRegistry.php on line 432
 ```
 
-<!-- 
-docker exec -it wikiprojects_testproject-wikibase-1 bash
-root@62261f3db565:/var/www/html# ls
+Restart All Services
 
-cd extensions/
-
-git clone -b REL1_39 https://github.com/thaider/Tweeki.git
-
-chown -R www-data:www-data /var/www/html/extensions/Tweeki
-
-
-Edit composer.yml  and add this line to mount custom extensions and skins.
-
-
-- $W4R_INIT_FOLDER/wiki/extensions:/var/www/html/extensions
-
-
-docker compose --env-file wikiProjects/testProject/config/.env up -d --build wikibase -->
-
+```
+./wiki.sh wikiProjects/testProject up
+```
 
 ---
 
@@ -129,6 +114,40 @@ cp wikiProjects/testProject/config/.env.template wikiProjects/testProject/config
 
 Eğer `.env` dosyasında host adını değiştirdiysen, burada da güncelle.
 
+
+## CHANGE SKIN VERSION FROM testProject/extensionManagement.json file
+
+```json
+"skins": {
+    "git": {
+        "Tweeki": {
+            "path": "https://github.com/thaider/Tweeki",
+            "version": "REL1_39",
+            "custom_folder": "",
+            "active": true
+        }
+    },
+    "composer": {
+
+    }
+}
+```
+
+<!-- 
+docker exec -it wikiprojects_testproject-wikibase-1 bash
+root@62261f3db565:/var/www/html# ls
+
+cd extensions/
+
+git clone -b REL1_39 https://github.com/thaider/Tweeki.git
+
+chown -R www-data:www-data /var/www/html/extensions/Tweeki
+
+
+docker compose --env-file wikiProjects/testProject/config/.env up -d --build wikibase -->
+
+
+
 ---
 
 ## ▶️ Kurulumu Çalıştır
@@ -157,7 +176,7 @@ Alternatif:
 ## 🔑 İlk Giriş
 
 `.env` dosyasında tanımladığın yönetici kullanıcı ile giriş yapabilirsin:
-Varsayılan: **admin / Mbry8992@**
+Varsayılan: **admin / 12345678**
 
 ---
 
