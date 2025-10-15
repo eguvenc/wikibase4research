@@ -49,17 +49,12 @@ This guide explains how to set up a custom Wikibase4Research project using a pre
 First, clone the main Wikibase4Research repository:
 
 ```bash
-git clone https://gitlab.com/nfdi4culture/wikibase4research/wikibase4research.git wbLocal
-cd wbLocal
+git clone https://gitlab.com/nfdi4culture/wikibase4research/wikibase4research.git wikitest
+cd wikitest
+git checkout 5339bb94f1e4b907642cc2a83eee3219b0c7a01f
+cp -r wikiPresets/semanticWikibase_plain/* wikiProjects/wikitest
+cp wikiProjects/wikitest/config/.env.template wikiProjects/wikitest/config/.env
 ```
-
-Create a folder for your custom project. Recommended structure: wikiProjects folder:
-
-```bash
-mkdir -p wikiProjects/wbLocal
-```
-
-> Replace `wbLocal` with your preferred project name.
 
 
 ## 2️⃣ Initialize a Git Repository
@@ -67,7 +62,20 @@ mkdir -p wikiProjects/wbLocal
 Inside your project folder, initialize a git repository to track your changes:
 
 ```bash
-git init wikiProjects/wbLocal
+git init wikiProjects/wikitest
+```
+Change branch name and set your repo url
+
+```bash
+cd /var/www/wikitest/wikiProjects/wikitest
+git branch -m main
+git remote add origin git@github.cosm:YOUR_USERNAME/wikitest.git
+```
+
+Example for gitlab:
+
+```bash
+git remote add origin git@git.tib.eu:guevence/wikitest.git
 ```
 
 ## 3️⃣ Copy a Matching Preset
@@ -75,7 +83,7 @@ git init wikiProjects/wbLocal
 Choose a preset that matches your needs and copy it to your project folder. For example, an empty Wikibase:
 
 ```bash
-cp -r wikiPresets/wikibase_plain/* wikiProjects/wbLocal
+cp -r wikiPresets/wikibase_plain/* wikiProjects/wikitest
 ```
 
 > You can use other presets as well (`semanticMediawiki_plain`, `wikibase_nfdi4culture`, etc.).
@@ -95,13 +103,13 @@ Add your own settings and content:
 1. Copy the environment template:
 
 ```bash
-cp wikiProjects/wbLocal/config/.env.template wikiProjects/wbLocal/config/.env
+cp wikiProjects/wikitest/config/.env.template wikiProjects/wikitest/config/.env
 ```
 
 2. Edit `.env` and set `W4R_INIT_FOLDER` to your project folder:
 
 ```env
-W4R_INIT_FOLDER=wikiProjects/wbLocal
+W4R_INIT_FOLDER=wikiProjects/wikitest
 ```
 
 **Important settings:**
@@ -110,7 +118,7 @@ W4R_INIT_FOLDER=wikiProjects/wbLocal
 * `W4R_MW_WIKI_NAME="MyWiki"` – Site name
 * `W4R_MW_ADMIN_USER="Admin"` / `W4R_MW_ADMIN_PASS="changeme123"` – Admin account
 * `W4R_SERVER_NAME="wb.local"` – Host name
-* `W4R_INIT_FOLDER="./wikiProjects/wbLocal"` – Points to the project folder
+* `W4R_INIT_FOLDER="./wikiProjects/wikitest"` – Points to the project folder
 * `W4R_COMPOSER_SERVICE_INCLUDE=control,elasticsearch,openrefine,wbjobrunner,wdqs,wiki` – Services to run
 * `W4R_REVERSEPROXY_PORT=80` – Proxy port
 
@@ -137,7 +145,7 @@ W4R_INIT_FOLDER=wikiProjects/wbLocal
 Save your changes:
 
 ```bash
-cd wikiProjects/wbLocal
+cd wikiProjects/wikitest
 git add .
 git commit -m "Initial commit"
 ```
@@ -149,6 +157,12 @@ Create a repo on GitHub or GitLab and push your project:
 ```bash
 git remote add origin git@github.com:USERNAME/REPO_NAME.git
 git push -u origin master
+```
+
+Example for gitlab:
+
+```bash
+git remote add origin git@git.tib.eu:guevence/wikitest.git
 ```
 
 ## 7️⃣ Start the Wiki
@@ -184,7 +198,7 @@ Open your browser at: `http://wb.local`
 ## Testing Job Runner:
 
 ```
-./wiki.sh wikiProjects/wbLocal command "php maintenance/runJobs.php"
+./wiki.sh wikiProjects/wikitest command "php maintenance/runJobs.php"
 
 Fatal error: Uncaught ExtensionDependencyError: Tweeki is not compatible with the current MediaWiki core (version 1.39.13), it requires: >= 1.43.0.
  in /var/www/html/includes/registration/ExtensionRegistry.php:432
@@ -200,7 +214,7 @@ Stack trace:
 ## How to Restart all Services:
 
 ```
-./wiki.sh wikiProjects/wbLocal up
+./wiki.sh wikiProjects/wikitest up
 ```
 
 ---
@@ -219,7 +233,7 @@ If you changed the host name in `.env`, update it here too.
 
 ---
 
-## CHANGE SKIN VERSION FROM wbLocal/extensionManagement.json
+## CHANGE SKIN VERSION FROM wikitest/extensionManagement.json
 
 ```json
 "skins": {
@@ -242,13 +256,13 @@ If you changed the host name in `.env`, update it here too.
 ## ▶️ Run the Installation
 
 ```bash
-./wiki.sh wikiProjects/wbLocal setup
+./wiki.sh wikiProjects/wikitest setup
 ```
 
 Alternative:
 
 ```bash
-./wiki.sh wikiProjects/wbLocal up --build -d
+./wiki.sh wikiProjects/wikitest up --build -d
 ```
 
 ---
@@ -288,13 +302,13 @@ For extra configurations, use the `config/LocalSettings.d/` folder.
 * Reload data:
 
 ```bash
-./wiki.sh wikiProjects/wbLocal munge
+./wiki.sh wikiProjects/wikitest munge
 ```
 
 Add TTL file:
 
 ```bash
-./wiki.sh wikiProjects/wbLocal addttl path/to/file.ttl
+./wiki.sh wikiProjects/wikitest addttl path/to/file.ttl
 ```
 
 ---
@@ -304,22 +318,22 @@ Add TTL file:
 **XML Dump:**
 
 ```bash
-./wiki.sh wikiProjects/wbLocal exportdump
-./wiki.sh wikiProjects/wbLocal importdump
+./wiki.sh wikiProjects/wikitest exportdump
+./wiki.sh wikiProjects/wikitest importdump
 ```
 
 **MySQL Dump:**
 
 ```bash
-./wiki.sh wikiProjects/wbLocal mysqldump
-./wiki.sh wikiProjects/wbLocal importmysqldump export/YYYY-MM-DD.sql
+./wiki.sh wikiProjects/wikitest mysqldump
+./wiki.sh wikiProjects/wikitest importmysqldump export/YYYY-MM-DD.sql
 ```
 
 **Full package:**
 
 ```bash
-./wiki.sh wikiProjects/wbLocal export
-./wiki.sh wikiProjects/wbLocal export-small
+./wiki.sh wikiProjects/wikitest export
+./wiki.sh wikiProjects/wikitest export-small
 ```
 
 > Note: Images are stored in `wb_resources/images/` and should also be copied.
@@ -331,13 +345,13 @@ Add TTL file:
 * Update:
 
 ```bash
-./wiki.sh wikiProjects/wbLocal update
+./wiki.sh wikiProjects/wikitest update
 ```
 
 * Remove (all data will be deleted):
 
 ```bash
-./wiki.sh wikiProjects/wbLocal remove
+./wiki.sh wikiProjects/wikitest remove
 ```
 
 ---
@@ -347,13 +361,13 @@ Add TTL file:
 * Run command inside container:
 
 ```bash
-./wiki.sh wikiProjects/wbLocal command "php maintenance/runJobs.php"
+./wiki.sh wikiProjects/wikitest command "php maintenance/runJobs.php"
 ```
 
 * Fix file permissions:
 
 ```bash
-./wiki.sh wikiProjects/wbLocal fixpermissions
+./wiki.sh wikiProjects/wikitest fixpermissions
 ```
 ---
 
