@@ -9,7 +9,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-Lukas Günter: The init command is quite new. I want to add new collections to it, like Semantic Mediawiki, but right now, I'm not there yet
+The init command is quite new. I want to add new collections to it, like Semantic Mediawiki, but right now, I'm not there yet
 Sorry, i should mark this as WIP
 Copying the folder is the way to go now.
 
